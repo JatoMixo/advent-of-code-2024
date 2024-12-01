@@ -1,4 +1,5 @@
 use std::io::Read;
+use std::collections::HashMap;
 
 fn get_input_data() -> String {
     let mut input_data = String::new();
@@ -24,16 +25,21 @@ fn main() {
     rows.iter().for_each(|&row| {
         let (left, right) = row.split_once("   ").unwrap();
 
-        left_values.push(left.parse::<i32>().unwrap());
-        right_values.push(right.parse::<i32>().unwrap());
+        left_values.push(left.parse::<u32>().unwrap());
+        right_values.push(right.parse::<u32>().unwrap());
     });
 
-    // TODO: Implement own sort function
-    left_values.sort();
-    right_values.sort();
+    let mut times_every_number_appears: HashMap<u32, u32> = HashMap::new();
 
-    let total_distance: i32 = left_values.iter().enumerate().map(|(index, &left_value)| {
-        (left_value - right_values[index]).abs()
+    right_values.iter().for_each(|&value| {
+        times_every_number_appears
+            .entry(value)
+            .and_modify(|times| *times += 1)
+            .or_insert(1);
+    });
+
+    let total_distance: u32 = left_values.iter().map(|&left| {
+        left * times_every_number_appears.get(&left).unwrap_or(&0u32)
     })
     .sum();
 
