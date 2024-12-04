@@ -1,4 +1,4 @@
-use std::{io::Read, thread::current};
+use std::io::Read;
 
 fn get_input_data() -> String {
     let mut input_data = String::new();
