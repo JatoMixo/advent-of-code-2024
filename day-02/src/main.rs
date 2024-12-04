@@ -1,4 +1,4 @@
-use std::io::Read;
+use std::{io::Read, thread::current};
 
 fn get_input_data() -> String {
     let mut input_data = String::new();
@@ -38,14 +38,11 @@ fn main() {
 }
 
 fn check_report(mut report: Vec<i32>) -> bool {
-    if report[0] - report[1] == 0 {
-        return false;
-    }
 
-    let direction = (report[0] - report[1]) / (report[0] - report[1]).abs();
+    let mut direction: Option<i32> = None;
 
     for level_index in 0..report.len() - 1 {
-        if check_level(&mut report, direction, level_index) {
+        if check_level(&mut report, &mut direction, level_index) {
             continue;
         }
 
@@ -68,14 +65,11 @@ fn check_report(mut report: Vec<i32>) -> bool {
 }
 
 fn check_report_no_dampener(report: Vec<i32>) -> bool {
-    if report[0] - report[1] == 0 {
-        return false;
-    }
 
-    let direction = (report[0] - report[1]) / (report[0] - report[1]).abs();
+    let mut direction = None;
 
     for level_index in 0..report.len() - 1 {
-        if !check_level(&report, direction, level_index) {
+        if !check_level(&report, &mut direction, level_index) {
             return false;
         }
     }
@@ -83,7 +77,7 @@ fn check_report_no_dampener(report: Vec<i32>) -> bool {
     true
 }
 
-fn check_level(levels: &Vec<i32>, direction: i32, index: usize) -> bool {
+fn check_level(levels: &Vec<i32>, direction: &mut Option<i32>, index: usize) -> bool {
     let distance = (levels[index] - levels[index + 1]).abs();
 
     if distance < 1 || distance > 3 {
@@ -92,9 +86,17 @@ fn check_level(levels: &Vec<i32>, direction: i32, index: usize) -> bool {
 
     let current_direction = (levels[index] - levels[index + 1]) / distance;
 
-    if current_direction != direction {
-        return false;
-    }
+    match direction {
+        Some(direction) => {
+            if *direction != current_direction {
+                return false;
+            }
 
-    true
+            true
+        },
+        None => {
+            *direction = Some(current_direction);
+            true
+        }
+    }
 }
