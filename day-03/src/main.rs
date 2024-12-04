@@ -15,14 +15,25 @@ fn main() {
     println!("============= DAY 03 =============");
     
     let data = get_input_data();
-    
-    let mut split_data = data.split("mul(").collect::<Vec<&str>>();
-    split_data.drain(0..1);
+
+    let result: u32 = get_fragments_between_separators(data, "do()", "don't()")
+        .iter()
+        .map(|fragment| {
+            calculate_fragment_amount(fragment)
+        })
+        .sum();
+
+    println!("{}", result);
+}
+
+fn calculate_fragment_amount(fragment: &String) -> u32 {
+    let mut split_fragment = fragment.split("mul(").collect::<Vec<&str>>();
+    split_fragment.drain(0..1);
 
     let mut result = 0;
 
-    for &data_fragment in split_data.iter() {
-        let multiplied_numbers = data_fragment.split(")").collect::<Vec<&str>>()[0];
+    for &fragment_section in split_fragment.iter() {
+        let multiplied_numbers = fragment_section.split(")").collect::<Vec<&str>>()[0];
 
         if !multiplied_numbers.contains(",") {
             continue;
@@ -35,5 +46,24 @@ fn main() {
         result += first * second;
     };
 
-    println!("{}", result);
+    result
+}
+
+// In a string, gets the fragments between two defined separators, to get fragments between don't's and do's
+fn get_fragments_between_separators(string: String, start: &str, end: &str) -> Vec<String> {
+    let mut split_by_end = string.split(end).collect::<Vec<&str>>();
+    let mut result = vec![split_by_end[0].to_string()];
+
+    split_by_end.drain(0..1);
+
+    split_by_end.iter().for_each(|&fragment| {
+        match fragment.split_once(start) {
+            None => {}
+            Some((_, final_fragment)) => {
+                result.push(final_fragment.to_string());
+            }
+        }
+    });
+
+    result
 }
