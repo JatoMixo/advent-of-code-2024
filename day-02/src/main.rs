@@ -17,7 +17,7 @@ fn main() {
     let data = get_input_data();
     let reports = data.split("\r\n").collect::<Vec<&str>>();
 
-    let safe_reports_count: i32 = reports.iter().map(|report| {
+    let safe_reports_count: i32 = reports.iter().map(|&report| {
 
         let levels = report
             .split(" ")
@@ -37,34 +37,25 @@ fn main() {
     println!("{}", safe_reports_count);
 }
 
-fn check_report(mut report: Vec<i32>) -> bool {
+fn check_report(report: Vec<i32>) -> bool {
 
-    let mut direction: Option<i32> = None;
-
-    for level_index in 0..report.len() - 1 {
-        if check_level(&mut report, &mut direction, level_index) {
-            continue;
-        }
-
-        // Check if invalid would be solved with dampener
-
-        let mut first_removed = report.clone();
-        first_removed.remove(level_index);
-
-        let mut second_removed = report.clone();
-        second_removed.remove(level_index + 1);
-
-        if check_report_no_dampener(first_removed) || check_report_no_dampener(second_removed) {
-            return true;
-        }
-
-        return false;
+    if check_report_no_dampener(&report) {
+        return true;
     }
 
-    true
+    for level_index in 0..report.len() {
+        let mut report_with_dampener = report.clone();
+        report_with_dampener.remove(level_index);
+
+        if check_report_no_dampener(&report_with_dampener) {
+            return true;
+        }
+    }
+
+    false
 }
 
-fn check_report_no_dampener(report: Vec<i32>) -> bool {
+fn check_report_no_dampener(report: &Vec<i32>) -> bool {
 
     let mut direction = None;
 
