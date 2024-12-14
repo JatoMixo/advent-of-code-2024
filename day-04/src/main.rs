@@ -14,8 +14,8 @@ fn get_input_data() -> String {
 fn main() {
     println!("============= DAY 04 =============");
     
-    // let data = get_input_data();
-    let data = String::from("MMMSXXMASM
+    let data = get_input_data();
+    /*let data = String::from("MMMSXXMASM
 MSAMXMSMSA
 AMXSXMAAMM
 MSAMASMSMX
@@ -24,7 +24,7 @@ XXAMMXXAMA
 SMSMSASXSS
 SAXAMASAAA
 MAMMMXMMMM
-MXMXAXMASX");
+MXMXAXMASX");*/
 
     let split_data = data.split("\n").collect::<Vec<&str>>();
 
