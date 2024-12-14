@@ -15,65 +15,129 @@ fn main() {
     println!("============= DAY 04 =============");
     
     // let data = get_input_data();
-    let data = String::from("..X...
-.SAMX.
-.A..A.
-XMAS.S
-.X....");
+    let data = String::from("MMMSXXMASM
+MSAMXMSMSA
+AMXSXMAAMM
+MSAMASMSMX
+XMASAMXAMM
+XXAMMXXAMA
+SMSMSASXSS
+SAXAMASAAA
+MAMMMXMMMM
+MXMXAXMASX");
 
     let split_data = data.split("\n").collect::<Vec<&str>>();
 
-    let mut result = 0;
-
-    split_data.iter().enumerate().for_each(|(index, &current_row)| {
-        current_row.chars().enumerate().for_each(|(char_index, character)| {
-            if character == 'X' {
-                if check_index(&split_data, index, char_index) {
-                    result += 1;
-                }
+    let result: u32 = split_data.iter().enumerate().map(|(row_index, &row)| {
+        row.chars().enumerate().map(|(character_index, character)| {
+            match character {
+                'X' => {
+                    check_position(&split_data, row_index, character_index)
+                },
+                _ => 0,
             }
-        });
-    });
+        }).sum::<u32>()
+    }).sum();
 
     println!("{}", result);
 }
 
-fn check_index(split_data: &Vec<&str>, row_index: usize, column_index: usize) -> bool {
-    const NEXT_PART: [char; 3] = ['M', 'A', 'S'];
-
-    for (checking_char_index, &checking_char) in NEXT_PART.iter().enumerate() {
-        let checking_positions = get_checking_positions_for_indices(row_index, column_index, checking_char_index);
-
-        for position in checking_positions {
-
-            let character = match split_data.get(position.0) {
-                None => {
-                    continue;
-                },
-                Some(&row) => {
-                    match row.chars().nth(position.1) {
-                        None => {
-                            continue;
-                        },
-                        Some(character) => character,
-                    }
-                }
-            };
-
-            if checking_char == character {
-
-                if &checking_char == NEXT_PART.last().unwrap() {
-                    return true;
-                }
-
-                continue;
-            }
+fn check_position(split_data: &Vec<&str>, row_index: usize, character_index: usize) -> u32 {
+    let valid_positions = vec![check_left_top(&split_data, row_index, character_index),
+                      check_center_top(&split_data, row_index, character_index),
+                      check_right_top(&split_data, row_index, character_index),
+                      check_left_middle(&split_data, row_index, character_index),
+                      check_right_middle(&split_data, row_index, character_index),
+                      check_left_bottom(&split_data, row_index, character_index),
+                      check_center_bottom(&split_data, row_index, character_index),
+                      check_right_bottom(&split_data, row_index, character_index)];
+    
+    valid_positions.iter().map(|&valid| {
+        match valid {
+            false => 0,
+            true => 1,
         }
-    }
-
-    false
+    }).sum()
 }
 
-fn get_checking_positions_for_indices(row: usize, column: usize, checking_char: usize) -> Vec<(usize, usize)> {
-    Vec::new()
+const CHARACTERS_TO_MATCH: &str = "XMAS";
+
+fn check_left_top(split_data: &Vec<&str>, row_index: usize, character_index: usize) -> bool {
+    if row_index < 3 || character_index < 3 {
+        return false;
+    }
+
+    !CHARACTERS_TO_MATCH.chars().enumerate().map(|(offset, character)| {
+        character == split_data[row_index - offset].chars().nth(character_index - offset).unwrap()
+    }).any(|is_valid_char| !is_valid_char)
+}
+
+fn check_center_top(split_data: &Vec<&str>, row_index: usize, character_index: usize) -> bool {
+    if row_index < 3 {
+        return false;
+    }
+
+    !CHARACTERS_TO_MATCH.chars().enumerate().map(|(offset, character)| {
+        character == split_data[row_index - offset].chars().nth(character_index).unwrap()
+    }).any(|is_valid_char| !is_valid_char)
+}
+
+fn check_right_top(split_data: &Vec<&str>, row_index: usize, character_index: usize) -> bool {
+    if row_index < 3 || character_index > split_data[0].len() - 4 {
+        return false;
+    }
+
+    !CHARACTERS_TO_MATCH.chars().enumerate().map(|(offset, character)| {
+        character == split_data[row_index - offset].chars().nth(character_index + offset).unwrap()
+    }).any(|is_valid_char| !is_valid_char)
+}
+
+fn check_left_middle(split_data: &Vec<&str>, row_index: usize, character_index: usize) -> bool {
+    if character_index < 3 {
+        return false;
+    }
+
+    !CHARACTERS_TO_MATCH.chars().enumerate().map(|(offset, character)| {
+        character == split_data[row_index].chars().nth(character_index - offset).unwrap()
+    }).any(|is_valid_char| !is_valid_char)
+}
+
+fn check_right_middle(split_data: &Vec<&str>, row_index: usize, character_index: usize) -> bool {
+    if character_index > split_data[0].len() - 4 {
+        return false;
+    }
+
+    !CHARACTERS_TO_MATCH.chars().enumerate().map(|(offset, character)| {
+        character == split_data[row_index].chars().nth(character_index + offset).unwrap()
+    }).any(|is_valid_char| !is_valid_char)
+}
+
+fn check_left_bottom(split_data: &Vec<&str>, row_index: usize, character_index: usize) -> bool {
+    if row_index > split_data.len() - 4 || character_index < 3 {
+        return false;
+    }
+
+    !CHARACTERS_TO_MATCH.chars().enumerate().map(|(offset, character)| {
+        character == split_data[row_index + offset].chars().nth(character_index - offset).unwrap()
+    }).any(|is_valid_char| !is_valid_char)
+}
+
+fn check_center_bottom(split_data: &Vec<&str>, row_index: usize, character_index: usize) -> bool {
+    if row_index > split_data.len() - 4 {
+        return false;
+    }
+
+    !CHARACTERS_TO_MATCH.chars().enumerate().map(|(offset, character)| {
+        character == split_data[row_index + offset].chars().nth(character_index).unwrap()
+    }).any(|is_valid_char| !is_valid_char)
+}
+
+fn check_right_bottom(split_data: &Vec<&str>, row_index: usize, character_index: usize) -> bool {
+    if row_index > split_data.len() - 4 || character_index > split_data[0].len() - 4 {
+        return false;
+    }
+
+    !CHARACTERS_TO_MATCH.chars().enumerate().map(|(offset, character)| {
+        character == split_data[row_index + offset].chars().nth(character_index + offset).unwrap()
+    }).any(|is_valid_char| !is_valid_char)
 }
