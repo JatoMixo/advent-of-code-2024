@@ -35,7 +35,7 @@ fn main() {
 
     let mut grid_size: u8 = 0;
 
-    data.split("\r\n")
+    data.split("\n")
         .collect::<Vec<&str>>()
         .iter()
         .enumerate()
@@ -71,12 +71,12 @@ fn main() {
         });
 
     let mut visited_locations: HashSet<(u8, u8)> = HashSet::new();
+    visited_locations.insert(current_position);
 
     loop {
         match current_rotation {
             Rotation::Up => {
 
-                // TODO: Make it so that obstacles are already ordered from smallest to biggest
                 let mut next_obstacles = obstacles_in_columns.get(&current_position.1).unwrap().iter().filter(|&obstacle| {
                     obstacle < &current_position.0
                 }).collect::<Vec<&u8>>();
@@ -93,7 +93,7 @@ fn main() {
 
                 let next_obstacle_row = **next_obstacles.last().unwrap();
 
-                for row in (next_obstacle_row + 1..current_position.0).rev() {
+                for row in next_obstacle_row + 1..current_position.0 {
                     visited_locations.insert((row, current_position.1));
                 }
 
@@ -102,7 +102,6 @@ fn main() {
             },
             Rotation::Down => {
 
-                // TODO: Make it so that obstacles are already ordered from smallest to biggest
                 let mut next_obstacles = obstacles_in_columns.get(&current_position.1).unwrap().iter().filter(|&obstacle| {
                     obstacle > &current_position.0
                 }).collect::<Vec<&u8>>();
@@ -128,7 +127,6 @@ fn main() {
             },
             Rotation::Right => {
 
-                // TODO: Make it so that obstacles are already ordered from smallest to biggest
                 let mut next_obstacles = obstacles_in_rows.get(&current_position.0).unwrap().iter().filter(|&obstacle| {
                     obstacle > &current_position.1
                 }).collect::<Vec<&u8>>();
@@ -154,7 +152,6 @@ fn main() {
             },
             Rotation::Left => {
 
-                // TODO: Make it so that obstacles are already ordered from smallest to biggest
                 let mut next_obstacles = obstacles_in_rows.get(&current_position.0).unwrap().iter().filter(|&obstacle| {
                     obstacle < &current_position.1
                 }).collect::<Vec<&u8>>();
@@ -171,7 +168,7 @@ fn main() {
 
                 let next_obstacle_column = **next_obstacles.last().unwrap();
 
-                for column in (next_obstacle_column + 1..current_position.1).rev() {
+                for column in next_obstacle_column + 1..current_position.1 {
                     visited_locations.insert((current_position.0, column));
                 }
 
