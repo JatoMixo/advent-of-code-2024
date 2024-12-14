@@ -21,8 +21,8 @@ fn main() {
     // ================
     // * Create an ordered vec with the order of all the numbers by the correct rules and use that to check that everything is appearing in the right order
     
-    // let data = get_input_data();
-    let data = String::from("47|53
+    let data = get_input_data();
+    /*let data = String::from("47|53
 97|13
 97|61
 97|47
@@ -49,13 +49,13 @@ fn main() {
 75,29,13
 75,97,47,61,53
 61,13,29
-97,13,75,29,47");
+97,13,75,29,47");*/
 
-    let (rules, updates) = data.split_once("\n\n").unwrap();
+    let (rules, updates) = data.split_once("\r\n\r\n").unwrap();
 
-    let rules = rules.split("\n").collect::<Vec<&str>>();
+    let rules = rules.split("\r\n").collect::<Vec<&str>>();
     let updates = updates
-        .split("\n")
+        .split("\r\n")
         .map(|update| {
             update.split(",").map(|number| {
                 number.parse::<u8>().unwrap()
