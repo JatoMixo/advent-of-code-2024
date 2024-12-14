@@ -67,26 +67,59 @@ fn main() {
 
     let result: u32 = updates.iter().map(|update| {
         match is_update_correct(&rules_map, update) {
-            false => 0,
-            true => {
-                update[update.len() / 2] as u32
-            }
+            false => {
+                let sorted_update = sort_update(&rules_map, &update);
+                sorted_update[sorted_update.len() / 2] as u32
+            },
+            true => 0,
         }
     }).sum();
 
     println!("{}", result);
 }
 
+fn sort_update(rules_map: &HashMap<u8, Vec<u8>>, update: &Vec<u8>) -> Vec<u8> {
+
+    if update.len() == 1 {
+        return update.clone();
+    }
+    
+    let mut last_element_index: usize = 0;
+    
+    for (page_index, &page) in update.iter().enumerate() {
+        let next_pages = rules_map.get(&page);
+        if next_pages.is_none() {
+            last_element_index = page_index;
+            break;
+        }
+
+        if next_pages.unwrap().iter().filter(|&next_page| {
+            update.contains(&next_page)
+        }).collect::<Vec<&u8>>().len() == 0 {
+            last_element_index = page_index;
+            break;
+        }
+    }
+
+    let mut update_last_removed = update.clone();
+    update_last_removed.remove(last_element_index);
+
+    let mut result = sort_update(rules_map, &update_last_removed);
+    result.push(update[last_element_index]);
+
+    result
+}
+
 fn is_update_correct(rules_map: &HashMap<u8, Vec<u8>>, update: &Vec<u8>) -> bool {
-    for (index, &page) in update.iter().enumerate().rev() {
-        let previous_pages_in_rules = rules_map.get(&page);
-        if previous_pages_in_rules.is_none() {
+    for (index, &page) in update.iter().enumerate() {
+        let next_pages_in_rules = rules_map.get(&page);
+        if next_pages_in_rules.is_none() {
             continue;
         }
 
-        let next_update_pages = &update[index..update.len()];
-        for &previous in previous_pages_in_rules.unwrap() {
-            if next_update_pages.contains(&previous) {
+        let previous_update_pages = &update[0..index];
+        for &next in next_pages_in_rules.unwrap() {
+            if previous_update_pages.contains(&next) {
                 return false;
             }
         }
@@ -105,9 +138,9 @@ fn get_rules_map(rules: Vec<&str>) -> HashMap<u8, Vec<u8>> {
         let second = second.parse::<u8>().unwrap();
 
         map
-            .entry(second)
-            .and_modify(|previous_nums: &mut Vec<u8>| previous_nums.push(first))
-            .or_insert(vec![first]);
+            .entry(first)
+            .and_modify(|previous_nums: &mut Vec<u8>| previous_nums.push(second))
+            .or_insert(vec![second]);
     });
 
     map
